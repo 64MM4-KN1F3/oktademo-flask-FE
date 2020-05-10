@@ -1,4 +1,5 @@
 import base64
+import requests
 
 from flask import Flask, render_template, url_for, redirect, session, json
 from flask_oidc import OpenIDConnect
@@ -15,7 +16,8 @@ app.config.update({
 })
 
 oidc = OpenIDConnect(app)
-
+with open("./api_secrets.json", "r") as f:
+    keys = json.load(f)
 
 @app.route("/")
 def home():
@@ -38,7 +40,19 @@ def login():
 
 @app.route("/profile")
 def profile():
-    info = oidc.user_getinfo(["sub", "name", "email", "locale", "groups"])
+    info = oidc.user_getinfo(["uid", "sub", "name", "email", "locale", "scp"])
+    url = "https://dev-499185.oktapreview.com/api/v1/groups/00grgs5guopWZpRw70h7/users"
+    print(keys)
+    payload = {}
+    headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': keys['oktademo_api'] 
+    }
+
+    response = requests.request("GET", url, headers=headers, data = payload)
+
+    print(response.text.encode('utf8'))
 
     return render_template("profile.html", profile=info, oidc=oidc)
 
