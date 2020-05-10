@@ -9,7 +9,7 @@ app.config.update({
     'OIDC_CLIENT_SECRETS': './client_secrets.json',
     'OIDC_DEBUG': True,
     'OIDC_ID_TOKEN_COOKIE_SECURE': False,
-    'OIDC_SCOPES': ["openid", "profile"],
+    'OIDC_SCOPES': ["openid", "profile", "groups"],
     'OVERWRITE_REDIRECT_URI': 'http://ec2-18-212-58-209.compute-1.amazonaws.com/authorization-code/callback',
     'OIDC_CALLBACK_ROUTE': '/authorization-code/callback'
 })
@@ -38,7 +38,7 @@ def login():
 
 @app.route("/profile")
 def profile():
-    info = oidc.user_getinfo(["sub", "name", "email", "locale"])
+    info = oidc.user_getinfo(["sub", "name", "email", "locale", "groups"])
 
     return render_template("profile.html", profile=info, oidc=oidc)
 
