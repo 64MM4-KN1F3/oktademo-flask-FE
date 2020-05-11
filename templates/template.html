@@ -40,6 +40,9 @@
             {% if oidc.user_loggedin %}
             <li><a id="profile-button" href="{{ url_for("profile") }}">My Profile</a></li>
             {% endif %}
+            {% if user_type == "admin" %}
+            <li><a id="admin-button" href="{{ url_for("admin") }}">Admin</a></li>
+            {% endif %}
         </ul>
         {% if oidc.user_loggedin %}
         <form method="post" action="{{ url_for("logout") }}" class="navbar-form navbar-right">

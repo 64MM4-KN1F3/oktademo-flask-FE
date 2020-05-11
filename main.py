@@ -16,6 +16,9 @@ app.config.update({
 })
 
 oidc = OpenIDConnect(app)
+user_type = "standard"
+
+#Loading API key separately mainly to keep it out of git repo (it's gitignored)
 with open("./api_secrets.json", "r") as f:
     keys = json.load(f)
 
@@ -40,21 +43,27 @@ def login():
 
 @app.route("/profile")
 def profile():
+    user_type="standard"
     info = oidc.user_getinfo(["uid", "sub", "name", "email", "locale", "scp"])
     url = "https://dev-499185.oktapreview.com/api/v1/groups/00grgs5guopWZpRw70h7/users"
-    print(keys)
     payload = {}
     headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'Authorization': keys['oktademo_api'] 
     }
-
+    sub = info['sub']
     response = requests.request("GET", url, headers=headers, data = payload)
-
-    print(response.text.encode('utf8'))
-
-    return render_template("profile.html", profile=info, oidc=oidc)
+    if response.status_code in range(200, 299):
+        #print(response.text.encode('utf8'))
+        data = response.json()
+        for item in data:
+            if item['id'] == sub:
+                user_type = "admin"
+                print("Authenticated user is an admin!")
+            else:
+                print("Authenticated user is a standard user.")
+    return render_template("profile.html", profile=info, oidc=oidc, value=user_type)
 
 
 @app.route("/logout", methods=["POST"])
